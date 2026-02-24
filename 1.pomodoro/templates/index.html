@@ -241,9 +241,9 @@
         </div>
 
         <div class="mode-selector">
-            <button class="mode-btn active" onclick="setMode('focus', 25)">集中 (25分)</button>
-            <button class="mode-btn" onclick="setMode('shortBreak', 5)">短休憩 (5分)</button>
-            <button class="mode-btn" onclick="setMode('longBreak', 15)">長休憩 (15分)</button>
+            <button class="mode-btn active" onclick="setMode('focus', 25, event)">集中 (25分)</button>
+            <button class="mode-btn" onclick="setMode('shortBreak', 5, event)">短休憩 (5分)</button>
+            <button class="mode-btn" onclick="setMode('longBreak', 15, event)">長休憩 (15分)</button>
         </div>
 
         <div class="status" id="status">準備完了</div>
@@ -378,13 +378,12 @@
             // 通知
             if (Notification.permission === 'granted') {
                 new Notification('ポモドーロタイマー', {
-                    body: currentMode === 'focus' ? '集中時間が終了しました！休憩しましょう。' : '休憩時間が終了しました！',
-                    icon: '🍅'
+                    body: currentMode === 'focus' ? '集中時間が終了しました！休憩しましょう。' : '休憩時間が終了しました！'
                 });
             }
         }
 
-        function setMode(mode, minutes) {
+        function setMode(mode, minutes, event) {
             if (!isRunning) {
                 currentMode = mode;
                 totalTime = minutes * 60;
