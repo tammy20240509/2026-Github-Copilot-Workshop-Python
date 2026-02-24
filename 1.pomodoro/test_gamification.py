@@ -69,9 +69,9 @@ class TestGamificationManager(unittest.TestCase):
         stats1 = self.manager.get_stats()
         self.assertEqual(stats1["current_streak"], 1)
         
-        # 2日目（手動で日付を変更）
-        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-        self.manager.data["last_completion_date"] = yesterday
+        # 2日目（手動で前日の日付を設定して連続をシミュレート）
+        previous_day = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        self.manager.data["last_completion_date"] = previous_day
         self.manager.complete_pomodoro()
         stats2 = self.manager.get_stats()
         self.assertEqual(stats2["current_streak"], 2)
@@ -99,9 +99,9 @@ class TestGamificationManager(unittest.TestCase):
         # 3日連続でポモドーロ完了をシミュレート
         for i in range(3):
             if i > 0:
-                # 前日の日付を設定
-                date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-                self.manager.data["last_completion_date"] = date
+                # 前日の日付を設定して連続をシミュレート
+                previous_day = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+                self.manager.data["last_completion_date"] = previous_day
                 self.manager._save_data()
             result = self.manager.complete_pomodoro()
         

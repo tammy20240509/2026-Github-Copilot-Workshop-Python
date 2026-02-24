@@ -116,6 +116,7 @@ class GamificationManager:
         self.data["xp"] += self.XP_PER_POMODORO
         
         # レベルアップチェック
+        # レベル計算: 累積XPに基づいて計算（0-99 XP: レベル1, 100-199 XP: レベル2, ...）
         new_level = (self.data["xp"] // self.XP_PER_LEVEL) + 1
         if new_level > self.data["level"]:
             self.data["level"] = new_level
