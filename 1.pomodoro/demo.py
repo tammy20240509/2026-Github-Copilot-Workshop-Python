@@ -1,222 +1,96 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Pomodoro Timer のデモンストレーション
-GUIなしでアプリケーションの機能を検証
+ゲーミフィケーション機能のデモスクリプト
+アプリケーションの機能を素早く確認するためのテスト
 """
 
-import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from gamification import GamificationManager, Achievement
 
 
-def demo_timer_logic():
-    """タイマーロジックのデモンストレーション"""
+def clear_screen():
+    """画面クリア"""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def demo_basic_functionality():
+    """基本機能のデモ"""
     print("=" * 60)
-    print("ポモドーロタイマー デモンストレーション")
+    print("🎮 ゲーミフィケーション機能デモ")
     print("=" * 60)
-    print()
     
-    # デフォルト設定
-    settings = {
-        "work_time": 25,
-        "break_time": 5,
-        "theme": "light",
-        "sound_start": True,
-        "sound_end": True,
-        "sound_tick": False
-    }
+    # テストファイルを使用
+    demo_file = "demo_gamification_data.json"
+    if os.path.exists(demo_file):
+        os.remove(demo_file)
     
-    print("1. デフォルト設定:")
-    print("-" * 60)
-    for key, value in settings.items():
-        print(f"  {key}: {value}")
-    print()
+    manager = GamificationManager(demo_file)
     
-    # 作業時間のカスタマイズ
-    print("2. 作業時間のカスタマイズ（15/25/35/45分）:")
-    print("-" * 60)
-    work_time_options = [15, 25, 35, 45]
-    for time in work_time_options:
-        seconds = time * 60
-        print(f"  {time}分 = {seconds}秒")
-    print()
+    print("\n【初期状態】")
+    stats = manager.get_stats()
+    print(f"  レベル: {stats['level']}")
+    print(f"  経験値: {stats['xp']}")
+    print(f"  完了数: {stats['total_completed']}")
     
-    # 休憩時間のカスタマイズ
-    print("3. 休憩時間のカスタマイズ（5/10/15分）:")
-    print("-" * 60)
-    break_time_options = [5, 10, 15]
-    for time in break_time_options:
-        seconds = time * 60
-        print(f"  {time}分 = {seconds}秒")
-    print()
+    print("\n【ポモドーロ1回完了】")
+    result = manager.complete_pomodoro()
+    print(f"  +{result['xp_gained']} XP 獲得")
+    if result["new_achievements"]:
+        print(f"  🏆 新しい実績: {result['new_achievements']}")
     
-    # テーマのカスタマイズ
-    print("4. テーマのカスタマイズ:")
-    print("-" * 60)
-    themes = {
-        "light": {
-            "name": "ライトテーマ",
-            "bg": "#ffffff",
-            "fg": "#000000",
-            "timer": "#2196F3"
-        },
-        "dark": {
-            "name": "ダークテーマ",
-            "bg": "#2b2b2b",
-            "fg": "#ffffff",
-            "timer": "#4CAF50"
-        },
-        "focus": {
-            "name": "フォーカステーマ",
-            "bg": "#f5f5f5",
-            "fg": "#333333",
-            "timer": "#FF6B6B"
-        }
-    }
-    for theme_id, theme_info in themes.items():
-        print(f"  {theme_info['name']} ({theme_id}):")
-        print(f"    背景色: {theme_info['bg']}")
-        print(f"    文字色: {theme_info['fg']}")
-        print(f"    タイマー色: {theme_info['timer']}")
-    print()
+    stats = manager.get_stats()
+    print(f"  現在のXP: {stats['xp']}")
+    print(f"  次のレベルまで: {stats['xp_to_next_level']} XP")
     
-    # サウンド設定
-    print("5. サウンド設定:")
-    print("-" * 60)
-    sound_settings = {
-        "sound_start": "開始音",
-        "sound_end": "終了音",
-        "sound_tick": "Tick音"
-    }
-    for key, name in sound_settings.items():
-        print(f"  {name} ({key}): オン/オフ切り替え可能")
-    print()
+    print("\n【10回完了してレベルアップ】")
+    for i in range(9):
+        manager.complete_pomodoro()
     
-    # タイマーのシミュレーション
-    print("6. タイマー動作のシミュレーション:")
-    print("-" * 60)
+    stats = manager.get_stats()
+    print(f"  現在のレベル: {stats['level']}")
+    print(f"  現在のXP: {stats['xp']}")
+    print(f"  完了数: {stats['total_completed']}")
     
-    # 作業時間のシミュレーション
-    print("  作業時間: 25分")
-    time_left = 25 * 60  # 1500秒
-    for i in range(5):  # 最初の5秒をシミュレート
-        minutes = time_left // 60
-        seconds = time_left % 60
-        print(f"    {minutes:02d}:{seconds:02d}")
-        time_left -= 1
-    print("    ...")
-    print("    00:00 - 作業時間終了！")
-    print()
+    print("\n【3日連続でストリーク実績獲得】")
+    # 日付を操作して3日連続をシミュレート
+    for day in range(2):
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        manager.data["last_completion_date"] = yesterday
+        manager._save_data()
+        result = manager.complete_pomodoro()
     
-    # 休憩時間のシミュレーション
-    print("  休憩時間: 5分")
-    time_left = 5 * 60  # 300秒
-    for i in range(5):
-        minutes = time_left // 60
-        seconds = time_left % 60
-        print(f"    {minutes:02d}:{seconds:02d}")
-        time_left -= 1
-    print("    ...")
-    print("    00:00 - 休憩時間終了！")
-    print()
+    stats = manager.get_stats()
+    print(f"  現在のストリーク: {stats['current_streak']}日")
+    print(f"  獲得した実績: {stats['earned_achievements']}")
     
-    # 設定の保存デモ
-    print("7. 設定の永続化:")
-    print("-" * 60)
+    print("\n【実績一覧】")
+    achievements = manager.get_achievement_list()
+    for achievement in achievements:
+        status = "✅" if achievement["earned"] else "⬜"
+        print(f"  {status} {achievement['name']}: {achievement['description']}")
     
-    # カスタム設定
-    custom_settings = {
-        "work_time": 35,
-        "break_time": 10,
-        "theme": "dark",
-        "sound_start": False,
-        "sound_end": True,
-        "sound_tick": True
-    }
+    print("\n【週間統計】")
+    weekly_stats = manager.get_weekly_stats()
+    for stat in weekly_stats:
+        print(f"  {stat['weekday']} {stat['date']}: {stat['count']}回")
     
-    print("  カスタム設定:")
-    for key, value in custom_settings.items():
-        print(f"    {key}: {value}")
-    print()
+    print("\n【最終統計】")
+    print(f"  レベル: {stats['level']}")
+    print(f"  経験値: {stats['xp']}")
+    print(f"  完了数: {stats['total_completed']}")
+    print(f"  今週の完了: {stats['weekly_completed']}回")
+    print(f"  今月の完了: {stats['monthly_completed']}回")
+    print(f"  現在のストリーク: {stats['current_streak']}日")
+    print(f"  最長ストリーク: {stats['longest_streak']}日")
     
-    # JSONファイルに保存
-    demo_settings_file = "/tmp/demo_pomodoro_settings.json"
-    with open(demo_settings_file, "w", encoding="utf-8") as f:
-        json.dump(custom_settings, f, indent=2, ensure_ascii=False)
-    
-    print(f"  設定を {demo_settings_file} に保存しました")
-    print()
-    
-    # ファイルの内容を表示
-    print("  保存された設定ファイルの内容:")
-    with open(demo_settings_file, "r", encoding="utf-8") as f:
-        content = f.read()
-        for line in content.split('\n'):
-            print(f"    {line}")
-    print()
-    
-    # ファイルから読み込み
-    with open(demo_settings_file, "r", encoding="utf-8") as f:
-        loaded_settings = json.load(f)
-    
-    print("  読み込んだ設定:")
-    for key, value in loaded_settings.items():
-        print(f"    {key}: {value}")
-    print()
+    print("\n" + "=" * 60)
+    print("✅ デモ完了！")
+    print("=" * 60)
     
     # クリーンアップ
-    if os.path.exists(demo_settings_file):
-        os.remove(demo_settings_file)
-    
-    print("=" * 60)
-    print("デモンストレーション完了")
-    print("=" * 60)
-
-
-def demo_requirements_check():
-    """要件の実装確認"""
-    print()
-    print("=" * 60)
-    print("要件の実装確認")
-    print("=" * 60)
-    print()
-    
-    requirements = [
-        {
-            "name": "時間設定を15/25/35/45分から選択",
-            "implemented": True,
-            "details": "ラジオボタンで選択可能"
-        },
-        {
-            "name": "ダーク/ライト/フォーカステーマ切替",
-            "implemented": True,
-            "details": "3つのテーマから選択可能"
-        },
-        {
-            "name": "開始音/終了音/tick音のオンオフ切り替え",
-            "implemented": True,
-            "details": "各サウンドを個別に制御可能"
-        },
-        {
-            "name": "休憩時間のカスタム（5/10/15分）",
-            "implemented": True,
-            "details": "ラジオボタンで選択可能"
-        }
-    ]
-    
-    for i, req in enumerate(requirements, 1):
-        status = "✓ 実装済み" if req["implemented"] else "✗ 未実装"
-        print(f"{i}. {req['name']}")
-        print(f"   {status}")
-        print(f"   詳細: {req['details']}")
-        print()
-    
-    print("=" * 60)
-    print("すべての要件が実装されています")
-    print("=" * 60)
+    if os.path.exists(demo_file):
+        os.remove(demo_file)
 
 
 if __name__ == "__main__":
-    demo_timer_logic()
-    demo_requirements_check()
+    demo_basic_functionality()

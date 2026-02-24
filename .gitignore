@@ -7,6 +7,9 @@ build/
 .pytest_cache/
 *.db
 
+# Gamification data
+gamification_data.json
+
 # Node
 node_modules/
 
