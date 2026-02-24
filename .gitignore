@@ -25,3 +25,6 @@ Thumbs.db
 
 # Flask
 instance/
+
+# Pomodoro Timer settings
+1.pomodoro/settings.json
