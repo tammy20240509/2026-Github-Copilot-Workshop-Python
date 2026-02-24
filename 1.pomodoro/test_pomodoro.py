@@ -142,7 +142,8 @@ class TestPomodoroTimer(unittest.TestCase):
         self.assertEqual(self.app.start_button.cget("text"), "開始")
     
     @patch('builtins.open', create=True)
-    def test_save_settings(self, mock_open):
+    @patch('json.dump')
+    def test_save_settings(self, mock_json_dump, mock_open):
         """設定の保存をテスト"""
         mock_file = Mock()
         mock_open.return_value.__enter__.return_value = mock_file
@@ -150,7 +151,14 @@ class TestPomodoroTimer(unittest.TestCase):
         self.app.settings["work_time"] = 35
         self.app.save_settings()
         
+        # ファイルが開かれたことを確認
         mock_open.assert_called_once()
+        # json.dumpが呼ばれたことを確認
+        mock_json_dump.assert_called_once()
+        # 正しい設定が保存されることを確認
+        call_args = mock_json_dump.call_args
+        saved_settings = call_args[0][0]
+        self.assertEqual(saved_settings["work_time"], 35)
     
     def test_work_time_update_while_running(self):
         """タイマー実行中の作業時間変更をテスト"""

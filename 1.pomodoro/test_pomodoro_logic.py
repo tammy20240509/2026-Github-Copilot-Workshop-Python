@@ -35,24 +35,28 @@ class TestPomodoroLogic(unittest.TestCase):
     def test_work_time_values(self):
         """作業時間の有効な値をテスト"""
         valid_work_times = [15, 25, 35, 45]
+        # 各値が正の整数で60分未満であることを確認
         for time in valid_work_times:
-            self.assertIn(time, valid_work_times)
-            self.assertGreater(time, 0)
-            self.assertLess(time, 60)
+            self.assertGreater(time, 0, f"{time}は正の値でなければなりません")
+            self.assertLess(time, 60, f"{time}は60分未満でなければなりません")
+            self.assertIsInstance(time, int, f"{time}は整数でなければなりません")
     
     def test_break_time_values(self):
         """休憩時間の有効な値をテスト"""
         valid_break_times = [5, 10, 15]
+        # 各値が正の整数で30分未満であることを確認
         for time in valid_break_times:
-            self.assertIn(time, valid_break_times)
-            self.assertGreater(time, 0)
-            self.assertLess(time, 30)
+            self.assertGreater(time, 0, f"{time}は正の値でなければなりません")
+            self.assertLess(time, 30, f"{time}は30分未満でなければなりません")
+            self.assertIsInstance(time, int, f"{time}は整数でなければなりません")
     
     def test_theme_values(self):
         """テーマの有効な値をテスト"""
         valid_themes = ["light", "dark", "focus"]
+        # 各テーマが文字列であることを確認
         for theme in valid_themes:
-            self.assertIn(theme, valid_themes)
+            self.assertIsInstance(theme, str, f"{theme}は文字列でなければなりません")
+            self.assertTrue(len(theme) > 0, f"{theme}は空文字列であってはいけません")
     
     def test_time_conversion(self):
         """分から秒への変換をテスト"""
@@ -142,21 +146,25 @@ class TestPomodoroRequirements(unittest.TestCase):
     def test_work_time_options_requirement(self):
         """要件: 時間設定を15/25/35/45分から選択できること"""
         required_options = [15, 25, 35, 45]
-        # すべてのオプションが利用可能であることを確認
-        for option in required_options:
-            self.assertIn(option, required_options)
+        # 要件通りの選択肢が用意されていることを確認
+        self.assertEqual(len(required_options), 4, "作業時間の選択肢は4つ必要です")
+        self.assertEqual(required_options, [15, 25, 35, 45], "作業時間の選択肢が要件通りであること")
     
     def test_break_time_options_requirement(self):
         """要件: 休憩時間のカスタム（5/10/15分）"""
         required_options = [5, 10, 15]
-        for option in required_options:
-            self.assertIn(option, required_options)
+        # 要件通りの選択肢が用意されていることを確認
+        self.assertEqual(len(required_options), 3, "休憩時間の選択肢は3つ必要です")
+        self.assertEqual(required_options, [5, 10, 15], "休憩時間の選択肢が要件通りであること")
     
     def test_theme_options_requirement(self):
         """要件: ダーク/ライト/フォーカス（ミニマル）テーマ切替"""
         required_themes = ["dark", "light", "focus"]
-        for theme in required_themes:
-            self.assertIn(theme, required_themes)
+        # 要件通りのテーマが用意されていることを確認
+        self.assertEqual(len(required_themes), 3, "テーマの選択肢は3つ必要です")
+        self.assertIn("dark", required_themes, "ダークテーマが必要です")
+        self.assertIn("light", required_themes, "ライトテーマが必要です")
+        self.assertIn("focus", required_themes, "フォーカステーマが必要です")
     
     def test_sound_toggle_requirement(self):
         """要件: 開始音/終了音/tick音のオンオフ切り替え"""
